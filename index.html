@@ -12,9 +12,33 @@
     <script>
         if('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-            })
+                navigator.serviceWorker.register('sw.js').then((reg)=>{
+                    console.log("Service worker registered.")
+                    reg.pushManager.getSubscription().then((sub) => {
+                        if(sub == null) {
+                            console.log("No subscribed to push service")
+                        } else {
+                            console.log('Subscription object ', sub);
+                        }
+                    });
+                }).catch(e => console.log("Failed to register service worker ", e));
+            });
+            navigator.serviceWorker.ready.then(reg => {
+                console.log('service worker ready.');
+                reg.pushManager.subscribe({
+                    userVisibleOnly: true
+                }).then(sub => {
+                        console.log("Endpoint URL: ", sub.endpoint);
+                }).catch(e => {
+                    if(Notification.permission === 'denied') {
+                         console.warn("Permission for notification was denied.")   
+                    } else {
+                        console.error("Unable to subscribe to push ", e);
+                    }   
+                });
+
+            });
         }
     </script>
 </body>
-</html>
+</html> 
